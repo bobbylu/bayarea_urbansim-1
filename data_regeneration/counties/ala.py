@@ -114,6 +114,7 @@ def year_assessed(date='ie670.Last document date (CCYYMMDD)'):
     # - "Last document prefix": not always numeric
     # - "Last document input date (CCYYMMDD)"
     # - "Property characteristic change date (CCYYMMDD)": from IE673
+    date.replace(0, np.nan, inplace=True)
     return date.floordiv(10000)
 
 
