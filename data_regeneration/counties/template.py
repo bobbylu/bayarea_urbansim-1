@@ -49,17 +49,17 @@ out = sim.column('parcels_out', cache=True)
 
 @out
 def county_id():
-
+    pass
 
 
 @out
 def parcel_id_local():
-
+    pass
 
 
 @out
 def land_use_type_id():
-
+    pass
 
 
 @out
@@ -69,27 +69,27 @@ def res_type(land_use_type_id='parcels_out.land_use_type_id'):
 
 @out
 def land_value():
-
+    pass
 
 
 @out
 def improvement_value():
-
+    pass
 
 
 @out
 def year_assessed():
-
+    pass
 
 
 @out
 def year_built():
-
+    pass
 
 
 @out
 def building_sqft():
-
+    pass
 
 
 @out
@@ -116,7 +116,7 @@ def sqft_per_unit(building_sqft='parcels_out.building_sqft',
 
 @out
 def stories():
-
+    pass
 
 
 @out
