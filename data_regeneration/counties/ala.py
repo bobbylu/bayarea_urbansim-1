@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
-import urbansim.sim.simulation as sim
-
 from spandex import TableLoader, TableFrame
 from spandex.io import df_to_db
+import urbansim.sim.simulation as sim
+
+import utils
 
 
 loader = TableLoader()
@@ -23,10 +24,6 @@ res_codes = {'single': ([1100] + range(1120, 1151) + range(1200, 1500) +
              'mixed': (range(3900, 4000) + [4101] + [4191] + [4240] +
                        [9401] + [9491])}
 exempt_codes = range(1, 1000)
-
-# Assume that each residential unit in a mixed-used parcel occupies
-# 1500 sqft, since residential vs. non-residential sqft is not known.
-sqft_per_res_unit = 1500.
 
 
 ## Register input tables.
@@ -94,10 +91,7 @@ def land_use_type_id(parcels_out, code='ie673.UseCode'):
 
 @out
 def res_type(land_use_type_id='parcels_out.land_use_type_id'):
-    lu = pd.Series(index=land_use_type_id.index, dtype=object)
-    for name, codes in res_codes.items():
-        lu[land_use_type_id.isin(codes)] = name
-    return lu
+    return utils.get_res_type(land_use_type_id, res_codes)
 
 
 @out
@@ -137,50 +131,22 @@ def building_sqft(sqft='ie673.BldgArea'):
 def non_residential_sqft(building_sqft='parcels_out.building_sqft',
                          res_type='parcels_out.res_type',
                          residential_units='parcels_out.residential_units'):
-    sqft = pd.Series(index=res_type.index)
-    building_sqft = building_sqft.reindex(sqft.index, copy=False)
-
-    # If not residential, assume all area is non-residential.
-    sqft[res_type.isnull()] = building_sqft
-
-    # If residential, assume zero non-residential area.
-    sqft[(res_type == 'single') | (res_type == 'multi')] = 0
-
-    # If mixed-use, assume residential units occupy some area.
-    sqft[res_type == 'mixed'] = (building_sqft -
-                                 sqft_per_res_unit * residential_units)
-
-    # Non-residential area must not be negative.
-    sqft[(sqft.notnull()) & (sqft < 0)] = 0
-
-    return sqft
+    return utils.get_nonresidential_sqft(building_sqft, res_type,
+                                         residential_units)
 
 
 @out
 def residential_units(tot_units='ie673.Units',
                       res_type='parcels_out.res_type'):
-    units = pd.Series(index=res_type.index)
-    tot_units = tot_units.reindex(units.index, copy=False)
-
-    # If not residential, assume zero residential units.
-    units[res_type.isnull()] = 0
-
-    # If single family residential, assume one residential unit.
-    units[res_type == 'single'] = 1
-
-    # If non-single residential, assume all units are all residential,
-    # even if mixed-use.
-    units[res_type == 'multi'] = tot_units
-    units[res_type == 'mixed'] = tot_units
-
-    return units
+    return utils.get_residential_units(tot_units, res_type)
 
 
 @out
 def sqft_per_unit(building_sqft='parcels_out.building_sqft',
                   non_residential_sqft='parcels_out.non_residential_sqft',
                   residential_units='parcels_out.residential_units'):
-    return (1. * building_sqft - non_residential_sqft) / residential_units
+    return utils.get_sqft_per_unit(building_sqft, non_residential_sqft,
+                                   residential_units)
 
 
 @out
@@ -191,10 +157,7 @@ def stories(stories='ie673.Stories'):
 
 @out
 def tax_exempt(land_use_type_id='parcels_out.land_use_type_id'):
-    exempt = pd.Series(index=land_use_type_id.index, dtype=int)
-    exempt[land_use_type_id.isin(exempt_codes)] = 1
-    exempt[~land_use_type_id.isin(exempt_codes)] = 0
-    return exempt
+    return utils.get_tax_exempt(land_use_type_id, exempt_codes)
 
 
 ## Export back to database.
