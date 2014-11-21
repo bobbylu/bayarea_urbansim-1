@@ -26,7 +26,7 @@ exempt_codes = []
 ## Register input tables.
 
 
-tf = TableFrame(staging.FIXME, index_col=FIXME)
+tf = TableFrame(staging.FIXME, index_col='FIXME')
 sim.add_table('parcels_in', tf, copy=False)
 
 
@@ -58,8 +58,8 @@ def parcel_id_local():
 
 
 @out
-def land_use_type_id():
-    pass
+def land_use_type_id(code='FIXME'):
+    return code
 
 
 @out
@@ -68,28 +68,30 @@ def res_type(land_use_type_id='parcels_out.land_use_type_id'):
 
 
 @out
-def land_value():
-    pass
+def land_value(value='FIXME'):
+    return value
 
 
 @out
-def improvement_value():
-    pass
+def improvement_value(value='FIXME'):
+    return value
 
 
 @out
-def year_assessed():
-    pass
+def year_assessed(year='FIXME'):
+    year.replace(0, np.nan, inplace=True)
+    return year
 
 
 @out
-def year_built():
-    pass
+def year_built(year='FIXME'):
+    year.replace(0, np.nan, inplace=True)
+    return year
 
 
 @out
-def building_sqft():
-    pass
+def building_sqft(sqft='FIXME'):
+    return sqft
 
 
 @out
@@ -115,8 +117,8 @@ def sqft_per_unit(building_sqft='parcels_out.building_sqft',
 
 
 @out
-def stories():
-    pass
+def stories(stories='FIXME'):
+    return stories
 
 
 @out
