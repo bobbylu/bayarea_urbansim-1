@@ -168,9 +168,7 @@ def stories(stories='scvta.NUMBER_OF1'):
 
 @out
 def tax_exempt(land_use_type_id='parcels_out.land_use_type_id'):
-    #return utils.get_tax_exempt(land_use_type_id, exempt_codes)
-    # Field not present, but could infer from land_use_type_id.
-    pass
+    return utils.get_tax_exempt(land_use_type_id, exempt_codes)
 
 
 ## Export back to database.
