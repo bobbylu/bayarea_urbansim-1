@@ -167,6 +167,10 @@ def tax_exempt(land_use_type_id='parcels_out.land_use_type_id'):
 @sim.model()
 def export(parcels_out):
     df = parcels_out.to_frame()
+
+    # Cast "land_use_type_id" to string for compatibility with other counties.
+    df['land_use_type_id'] = df.land_use_type_id.astype(str)
+
     assert df.index.is_unique
     assert not df.index.hasnans()
     df_to_db(df, 'attributes_ala', schema=staging)
