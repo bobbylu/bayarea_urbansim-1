@@ -45,9 +45,8 @@ shapefiles = {
     'staging.parcels_nap_tract':
     'built/parcel/2010/nap/Napa_Census_tract.shp',
 
-    # Missing shx file.
-    #'staging.parcels_mar':
-    #'built/parcel/2005/parcels2005_mar.shp',
+    'staging.parcels_mar':
+    'built/parcel/2005/parcels2005_mar.shp',
 
     'staging.parcels_scl':
     'built/parcel/2010/scl/parcels2010_scl.shp',
