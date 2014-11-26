@@ -66,6 +66,17 @@ INSERT INTO parcels (
   UNION
   SELECT to_char(county_id, 'FM000') AS county_id, apn,
          NULL AS parcel_id_local,
+         to_char(land_use_t, 'FM0000') AS land_use_type_id,
+         NULL AS res_type, land_value, improvemen AS improvement_value,
+         NULL AS year_assessed,
+         year_built, building_s AS building_sqft,
+         non_reside AS non_residential_sqft,
+         residentia AS residential_units, sqft_per_u AS sqft_per_unit, stories,
+         tax_exempt, geom
+  FROM   staging.old_sol
+  UNION
+  SELECT to_char(county_id, 'FM000') AS county_id, apn,
+         NULL AS parcel_id_local,
          to_char(land_use_t, 'FM000') AS land_use_type_id,
          NULL AS res_type, land_value, improvemen AS improvement_value,
          NULL AS year_assessed,

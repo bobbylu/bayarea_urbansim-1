@@ -10,6 +10,7 @@ logger.setLevel(logging.INFO)
 
 shapefiles = {'staging.old_cnc': 'contra_costa.shp',
               'staging.old_nap': 'napa.shp',
+              'staging.old_sol': 'solano.shp',
               'staging.old_son': 'sonoma.shp'}
 
 
