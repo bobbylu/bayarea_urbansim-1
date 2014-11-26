@@ -59,10 +59,10 @@ INSERT INTO parcels (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_scl as a,
-         (SELECT   apn, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   parcel, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
           FROM     staging.parcels_scl
-          GROUP BY apn) AS p
-  WHERE  a.apn = p.apn
+          GROUP BY parcel) AS p
+  WHERE  a.apn = p.parcel
   UNION
   SELECT to_char(county_id, 'FM000') AS county_id, apn,
          NULL AS parcel_id_local,
