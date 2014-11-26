@@ -27,7 +27,7 @@ exempt_codes = []
 
 
 tf = TableFrame(staging.FIXME, index_col='FIXME')
-sim.add_table('parcels_in', tf, copy=False)
+sim.add_table('parcels_in', tf, copy_col=False)
 
 
 ## Register output table.

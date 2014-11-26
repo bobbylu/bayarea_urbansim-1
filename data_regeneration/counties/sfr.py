@@ -23,7 +23,7 @@ exempt_codes = []
 # Alternate index column is "mapblklot", but it was not unique for
 # parcels in Treasure Island.
 tf = TableFrame(staging.parcels_sfr, index_col='blklot')
-sim.add_table('parcels_in', tf, copy=False)
+sim.add_table('parcels_in', tf, copy_col=False)
 
 
 ## Register output table.

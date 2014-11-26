@@ -30,7 +30,7 @@ exempt_codes = []
 
 
 tf = TableFrame(staging.parcels_smt, index_col='apn')
-sim.add_table('parcels_in', tf, copy=False)
+sim.add_table('parcels_in', tf, copy_col=False)
 
 
 @sim.table_source()
