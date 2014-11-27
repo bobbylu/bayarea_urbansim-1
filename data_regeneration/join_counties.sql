@@ -120,3 +120,9 @@ INSERT INTO parcels (
 
 CREATE INDEX parcels_geom_gist ON parcels
   USING gist (geom);
+
+-- Report number of parcels by county.
+SELECT   county_id, count(*)
+FROM     parcels
+GROUP BY county_id
+ORDER BY county_id;
