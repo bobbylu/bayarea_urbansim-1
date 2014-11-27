@@ -70,8 +70,8 @@ shapefiles = {
     #'staging.parcels_son_exlu':
     #'built/parcel/2010/son/parcels2010_son/Final2010exlu.shp',
 
-    #'staging.taz':
-    #'juris/reg/zones/taz1454.shp',
+    'staging.taz':
+    'juris/reg/zones/taz1454.shp',
 }
 
 
