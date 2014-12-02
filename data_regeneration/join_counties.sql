@@ -5,7 +5,7 @@ CREATE TABLE parcels (
   apn text NOT NULL,
   parcel_id_local text,
   land_use_type_id text,
-  res_type TEXT,
+  res_type text,
   land_value float,
   improvement_value float,
   year_assessed float,
