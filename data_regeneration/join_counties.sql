@@ -55,14 +55,15 @@ INSERT INTO parcels (
           GROUP BY parcel) AS p
   WHERE  a.apn = p.parcel
   UNION
-  SELECT to_char(county_id, 'FM000') AS county_id, apn,
-         NULL AS parcel_id_local,
-         to_char(land_use_t, 'FM0000') AS land_use_type_id,
-         NULL AS res_type, land_value, NULL AS improvement_value,
-         NULL AS year_assessed, NULL AS year_built, NULL AS building_sqft,
-         NULL AS non_residential_sqft, NULL AS residential_units,
-         NULL AS sqft_per_unit, NULL AS stories, tax_exempt, geom
-  FROM   staging.old_nap
+  SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
+         a.res_type, a.land_value, a.improvement_value, a.year_assessed,
+         a.year_built, a.building_sqft, a.non_residential_sqft,
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+  FROM   staging.attributes_nap as a,
+         (SELECT   asmt, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+          FROM     staging.parcels_nap
+          GROUP BY asmt) AS p
+  WHERE  a.apn = p.asmt
   UNION
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
