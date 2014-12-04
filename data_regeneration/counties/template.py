@@ -130,10 +130,10 @@ def tax_exempt(land_use_type_id='parcels_out.land_use_type_id'):
 
 
 @sim.model()
-def export(parcels_out):
+def export_FIXME(parcels_out):
     df = parcels_out.to_frame()
     assert df.index.is_unique
     assert not df.index.hasnans()
     df_to_db(df, 'attributes_FIXME', schema=staging)
 
-sim.run(['export'])
+sim.run(['export_FIXME'])
