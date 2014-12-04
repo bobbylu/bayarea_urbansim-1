@@ -37,7 +37,7 @@ sim.add_table('parcels_in', tf, copy_col=False)
 def ie670():
     filepath = \
         loader.get_path('built/parcel/2010/ala/assessor_nov10/IE670c.txt')
-    df = pd.read_table(filepath, sep='\t', index_col=False)
+    df = pd.read_table(filepath, sep='\t', index_col=False, low_memory=False)
     df.set_index("Assessor's Parcel Number (APN) sort format", inplace=True)
     assert df.index.is_unique
     assert not df.index.hasnans()
