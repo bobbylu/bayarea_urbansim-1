@@ -30,7 +30,7 @@ exempt_codes = []
 tf = TableFrame(staging.parcels_sol)
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def parcels_in():
     # Build DataFrame from subset of TableFrame columns.
     column_names = ['apn', 'usecode', 'valland', 'valimp', 'pdyrblt',

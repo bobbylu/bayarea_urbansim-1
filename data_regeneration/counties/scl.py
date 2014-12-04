@@ -31,7 +31,7 @@ tf = TableFrame(staging.parcels_scl, index_col='parcel')
 sim.add_table('parcels_in', tf, copy_col=False)
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def scvta():
     # Will need to group by the site address fields later to aggregate
     # condos with multiple parcels but only a single polygon. Currently,

@@ -33,7 +33,7 @@ tf = TableFrame(staging.parcels_smt, index_col='apn')
 sim.add_table('parcels_in', tf, copy_col=False)
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def roll():
     mdb = loader.get_path(
         'built/parcel/2010/smt/Property Characteristics/ASSESSOR_ROLL.mdb'
@@ -58,7 +58,7 @@ def roll():
     return df
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def situs():
     csv = loader.get_path(
         'built/parcel/2010/smt/Property Characteristics/SITUS_SNPSHT.csv'

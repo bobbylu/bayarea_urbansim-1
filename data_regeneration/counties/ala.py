@@ -33,7 +33,7 @@ tf = TableFrame(staging.parcels_ala, index_col='apn_sort')
 sim.add_table('parcels_in', tf, copy_col=False)
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def ie670():
     filepath = \
         loader.get_path('built/parcel/2010/ala/assessor_nov10/IE670c.txt')
@@ -44,7 +44,7 @@ def ie670():
     return df
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def ie673():
     filepath = \
         loader.get_path('built/parcel/2010/ala/assessor_nov10/IE673c.txt')

@@ -24,7 +24,7 @@ tf = TableFrame(staging.parcels_nap, index_col='asmt')
 sim.add_table('parcels_in', tf, copy_col=False)
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def buildings():
     df = loader.get_attributes('built/parcel/2010/nap/Napa_buildings.dbf')
 
@@ -38,7 +38,7 @@ def buildings():
     return df
 
 
-@sim.table_source()
+@sim.table(cache=True)
 def taxroll():
     df = loader.get_attributes('built/parcel/2010/nap/Napa_taxroll.dbf')
 
