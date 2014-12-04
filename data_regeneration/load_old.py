@@ -8,8 +8,7 @@ from spandex.spatialtoolz import conform_srids
 logger.setLevel(logging.INFO)
 
 
-shapefiles = {'staging.old_cnc': 'contra_costa.shp',
-              'staging.old_son': 'sonoma.shp'}
+shapefiles = {'staging.old_cnc': 'contra_costa.shp'}
 
 
 # Load shapefiles specified above to the project database.

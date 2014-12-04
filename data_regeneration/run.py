@@ -36,7 +36,7 @@ print("PROCESSING: Loading parcel attributes by county.")
 
 # Run county attribute processing scripts in parallel.
 # Needs more memory (~8GB) to work with large pandas objects simultaneously.
-county_names = ['ala', 'mar', 'nap', 'scl', 'sfr', 'smt', 'sol']
+county_names = ['ala', 'mar', 'nap', 'scl', 'sfr', 'smt', 'sol', 'son']
 county_processes = []
 for name in county_names:
     path = os.path.join('counties', name + '.py')
