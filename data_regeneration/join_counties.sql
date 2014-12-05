@@ -36,14 +36,16 @@ INSERT INTO parcels (
           GROUP BY apn_sort) AS p
   WHERE  a.apn = p.apn_sort
   UNION
-  SELECT to_char(county_id, 'FM000') AS county_id, apn,
-         to_char(parc_py_id, 'FM000000') AS parcel_id_local,
-         to_char(land_use_t, 'FM00') AS land_use_type_id, NULL AS res_type,
-         land_value, improvemen AS improvement_value, NULL AS year_assessed,
-         year_built, building_s AS building_sqft,
-         non_reside AS non_residential_sqft, residentia AS residential_units,
-         sqft_per_u AS sqft_per_unit, stories, tax_exempt, geom
-  FROM   staging.old_cnc
+  SELECT a.county_id, a.apn::int::text, a.parcel_id_local, a.land_use_type_id,
+         a.res_type, a.land_value, a.improvement_value, a.year_assessed,
+         a.year_built, a.building_sqft, a.non_residential_sqft,
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+  FROM   staging.attributes_cnc as a,
+         (SELECT   parc_py_id,
+                   ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+          FROM     staging.parcels_cnc_poly
+          GROUP BY parc_py_id) AS p
+  WHERE  a.apn = p.parc_py_id
   UNION
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
