@@ -106,7 +106,7 @@ def improvement_value(value='abag.StructureValue'):
 
 @out
 def year_assessed(date='abag.LastSaleDate'):
-    year = date.apply(lambda d: d and d.year)
+    year = date.apply(lambda d: d.year if d else np.nan)
     year.replace([-1, 0], np.nan, inplace=True)
     return year
 

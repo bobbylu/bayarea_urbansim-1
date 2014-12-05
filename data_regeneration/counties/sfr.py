@@ -87,7 +87,7 @@ def improvement_value(value='parcels_in.strucval'):
 
 @out
 def year_assessed(date='parcels_in.lastsale'):
-    year = pd.Series(pd.DatetimeIndex(date).year, index=date.index)
+    year = date.apply(lambda d: d.year if d else np.nan)
     year.replace([-1, 0], np.nan, inplace=True)
     return year
 
