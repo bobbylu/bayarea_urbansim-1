@@ -82,7 +82,7 @@ def parcel_id_local():
 @out
 def land_use_type_id(code='parcels_in.landuse1'):
     # Take last land use code when deduplicating.
-    return code.groupby(code.index).last()
+    return code.groupby(level=0).last()
 
 
 @out
@@ -148,7 +148,7 @@ def sqft_per_unit(building_sqft='parcels_out.building_sqft',
 @out
 def stories(stories='parcels_in.floor'):
     # Take greatest number of stories when deduplicating.
-    return stories.groupby(stories.index).max().astype(float)
+    return stories.groupby(level=0).max().astype(float)
 
 
 @out
