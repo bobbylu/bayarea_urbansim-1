@@ -103,7 +103,9 @@ INSERT INTO parcels (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_sfr as a,
-         staging.parcels_sfr AS p
+         (SELECT   blklot, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+          FROM     staging.parcels_sfr
+          GROUP BY blklot) AS p
   WHERE  a.apn = p.blklot
   UNION
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
