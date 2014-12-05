@@ -52,6 +52,11 @@ while len(succeeded) < len(county_processes):
             continue
         retcode = process.poll()
         if retcode:
+            for (_, process) in county_processes:
+                try:
+                    process.terminate()
+                except:
+                    pass
             raise RuntimeError("County loading of {} failed.".format(name))
         elif retcode == 0:
             succeeded.add(name)
