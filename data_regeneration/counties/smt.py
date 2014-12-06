@@ -1,4 +1,5 @@
 import os
+import string
 import subprocess
 
 import numpy as np
@@ -20,8 +21,9 @@ staging = loader.tables.staging
 # Use codes were classified manually because the assessor classifications
 # are meant for property tax purposes. These classifications should be
 # reviewed and revised.
-res_codes = {'single': [],
-             'multi': [],
+res_codes = {'single': ['01', '51', '52', '53'],
+             'multi': [string.zfill(i, 2) for i in
+                       range(2, 6) + range(7, 10) + range(89, 99)],
              'mixed': []}
 exempt_codes = []
 
@@ -136,25 +138,30 @@ def year_built():
 
 @out
 def building_sqft():
-    # Possibly represented as "TRA" in roll table. Tax assessor website
-    # was unvailable for maintenance and could not be verified against
-    # for consistency.
-    return np.nan
+    # Workaround since np.nan would raise an exception when injecting below.
+    return pd.Series()
 
 
 @out
-def non_residential_sqft():
-    return np.nan
+def non_residential_sqft(building_sqft='parcels_out.building_sqft',
+                         res_type='parcels_out.res_type',
+                         residential_units='parcels_out.residential_units'):
+    return utils.get_nonresidential_sqft(building_sqft, res_type,
+                                         residential_units)
 
 
 @out
-def residential_units():
-    return np.nan
+def residential_units(res_type='parcels_out.res_type'):
+    return utils.get_residential_units(tot_units=pd.Series(),
+                                       res_type=res_type)
 
 
 @out
-def sqft_per_unit():
-    return np.nan
+def sqft_per_unit(building_sqft='parcels_out.building_sqft',
+                  non_residential_sqft='parcels_out.non_residential_sqft',
+                  residential_units='parcels_out.residential_units'):
+    return utils.get_sqft_per_unit(building_sqft, non_residential_sqft,
+                                   residential_units)
 
 
 @out
