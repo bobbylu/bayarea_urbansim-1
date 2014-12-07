@@ -75,8 +75,16 @@ shapefiles = {
 }
 
 
-# Load shapefiles specified above to the project database.
+# Install PostGIS and create staging schema.
 loader = TableLoader()
+with loader.database.cursor() as cur:
+    cur.execute("""
+        CREATE EXTENSION IF NOT EXISTS postgis;
+        CREATE SCHEMA IF NOT EXISTS staging;
+    """)
+loader.database.refresh()
+
+# Load shapefiles specified above to the project database.
 loader.load_shp_map(shapefiles)
 
 # Fix invalid geometries and reproject.
