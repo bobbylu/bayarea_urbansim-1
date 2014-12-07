@@ -118,9 +118,8 @@ INSERT INTO parcels (
           GROUP BY apn) AS p
   WHERE  a.apn = p.apn;
 
--- Need to union/collect all geometries by APN before enforcing constraint.
--- ALTER TABLE parcels ADD CONSTRAINT parcels_apn_unique
---   UNIQUE (county_id, apn);
+ALTER TABLE parcels ADD CONSTRAINT parcels_apn_unique
+  UNIQUE (county_id, apn);
 
 CREATE INDEX parcels_geom_gist ON parcels
   USING gist (geom);
