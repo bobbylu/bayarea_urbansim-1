@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import time
 
 from spandex import TableLoader
 
@@ -34,33 +33,11 @@ check_run('load.py')
 print("PROCESSING: Loading parcel attributes by county.")
 
 
-# Run county attribute processing scripts in parallel.
-# Needs more memory (~8GB) to work with large pandas objects simultaneously.
+# Run county attribute processing scripts.
 county_names = ['ala', 'cnc', 'mar', 'nap', 'scl', 'sfr', 'smt', 'sol', 'son']
-county_processes = []
 for name in county_names:
-    path = os.path.join('counties', name + '.py')
-    county_processes.append((name, run(path)))
-
-# Wait for completion of county attribute processing and check for success.
-# Repeatedly iterate over all processes to quickly raise an exception
-# if a non-zero exit status is found.
-succeeded = set()
-while len(succeeded) < len(county_processes):
-    for (name, process) in county_processes:
-        if name in succeeded:
-            continue
-        retcode = process.poll()
-        if retcode:
-            for (_, process) in county_processes:
-                try:
-                    process.terminate()
-                except:
-                    pass
-            raise RuntimeError("County loading of {} failed.".format(name))
-        elif retcode == 0:
-            succeeded.add(name)
-    time.sleep(1)
+    filename = os.path.join('counties', name + '.py')
+    check_run(filename)
 
 
 print("PROCESSING: Combining to create regional parcels table.")
