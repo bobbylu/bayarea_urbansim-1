@@ -96,7 +96,7 @@ INSERT INTO parcels (
           FROM     staging.parcels_son
           GROUP BY apn) AS p
   WHERE  a.apn = p.apn
-         AND a.apn SIMILAR TO '%[0-9]{3}' OR a.apn LIKE '%COM'
+         AND a.apn SIMILAR TO '%[0-9]{3}'
   UNION
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
