@@ -96,6 +96,12 @@ CREATE TABLE parcels AS (
 ALTER TABLE parcels ADD COLUMN id serial PRIMARY KEY;
 
 ALTER TABLE parcels ALTER COLUMN county_id SET DATA TYPE char(3);
+ALTER TABLE parcels ALTER COLUMN geom
+  SET DATA TYPE geometry(MultiPolygon);
+
+SELECT UpdateGeometrySRID('parcels','geom',
+  (SELECT Find_SRID('staging', 'parcels_ala', 'geom')));
+
 ALTER TABLE parcels ALTER COLUMN county_id SET NOT NULL;
 ALTER TABLE parcels ALTER COLUMN apn       SET NOT NULL;
 ALTER TABLE parcels ALTER COLUMN geom      SET NOT NULL;
