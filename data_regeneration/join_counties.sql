@@ -5,7 +5,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_ala as a,
-         (SELECT   apn_sort, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   apn_sort,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_ala
           GROUP BY apn_sort) AS p
   WHERE  a.apn = p.apn_sort
@@ -16,7 +17,7 @@ CREATE TABLE parcels AS (
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_cnc as a,
          (SELECT   parc_py_id,
-                   ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_cnc_poly
           GROUP BY parc_py_id) AS p
   WHERE  a.apn = p.parc_py_id
@@ -26,7 +27,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_mar as a,
-         (SELECT   parcel, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   parcel,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_mar
           GROUP BY parcel) AS p
   WHERE  a.apn = p.parcel
@@ -36,7 +38,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_nap as a,
-         (SELECT   asmt, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   asmt,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_nap
           GROUP BY asmt) AS p
   WHERE  a.apn = p.asmt
@@ -46,7 +49,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_scl as a,
-         (SELECT   parcel, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   parcel,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_scl
           GROUP BY parcel) AS p
   WHERE  a.apn = p.parcel
@@ -56,7 +60,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_sol as a,
-         (SELECT   apn, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   apn,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_sol
           GROUP BY apn) AS p
   WHERE  a.apn = p.apn
@@ -66,7 +71,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_son as a,
-         (SELECT   apn, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   apn,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_son
           GROUP BY apn) AS p
   WHERE  a.apn = p.apn
@@ -77,7 +83,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_sfr as a,
-         (SELECT   blklot, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   blklot,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_sfr
           GROUP BY blklot) AS p
   WHERE  a.apn = p.blklot
@@ -87,7 +94,8 @@ CREATE TABLE parcels AS (
          a.year_built, a.building_sqft, a.non_residential_sqft,
          a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
   FROM   staging.attributes_smt as a,
-         (SELECT   apn, ST_CollectionExtract(ST_Collect(geom), 3) AS geom
+         (SELECT   apn,
+                   ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
           FROM     staging.parcels_smt
           GROUP BY apn) AS p
   WHERE  a.apn = p.apn
