@@ -1,4 +1,7 @@
+-- Delete existing parcels table.
 DROP TABLE IF EXISTS parcels;
+
+-- Combine county attributes and geometries into regional parcels table.
 CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
@@ -101,21 +104,23 @@ CREATE TABLE parcels AS (
   WHERE  a.apn = p.apn
 );
 
-ALTER TABLE parcels ADD COLUMN id serial PRIMARY KEY;
-
-ALTER TABLE parcels ALTER COLUMN county_id SET DATA TYPE char(3);
+-- Add back specific geometry data type, which was lost during table union.
 ALTER TABLE parcels ALTER COLUMN geom
   SET DATA TYPE geometry(MultiPolygon);
-
 SELECT UpdateGeometrySRID('parcels','geom',
   (SELECT Find_SRID('staging', 'parcels_ala', 'geom')));
 
+-- Add primary key column.
+ALTER TABLE parcels ADD COLUMN id serial PRIMARY KEY;
+
+-- Add parcels table constraints.
+ALTER TABLE parcels ALTER COLUMN county_id SET DATA TYPE char(3);
 ALTER TABLE parcels ALTER COLUMN county_id SET NOT NULL;
 ALTER TABLE parcels ALTER COLUMN apn       SET NOT NULL;
 ALTER TABLE parcels ALTER COLUMN geom      SET NOT NULL;
-
 ALTER TABLE parcels ADD CONSTRAINT parcels_apn_unique
   UNIQUE (county_id, apn);
 
+-- Create spatial index.
 CREATE INDEX parcels_geom_gist ON parcels
   USING gist (geom);
