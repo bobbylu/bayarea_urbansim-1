@@ -124,3 +124,14 @@ ALTER TABLE parcels ADD CONSTRAINT parcels_apn_unique
 -- Create spatial index.
 CREATE INDEX parcels_geom_gist ON parcels
   USING gist (geom);
+
+-- Add county land use code mapping unique constraint.
+ALTER TABLE staging.lucodes ADD CONSTRAINT lucodes_unique
+  UNIQUE (county_id, land_use_type_id);
+
+-- Map county land use codes to regional codes.
+ALTER TABLE parcels ADD COLUMN development_type_id varchar(3);
+UPDATE parcels SET development_type_id = lucodes.development_type_id
+FROM staging.lucodes AS lucodes
+WHERE parcels.county_id = lucodes.county_id AND
+      parcels.land_use_type_id = lucodes.land_use_type_id;

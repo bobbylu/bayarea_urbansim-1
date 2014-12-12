@@ -1,7 +1,8 @@
 import logging
 
+import pandas as pd
 from spandex import TableLoader
-from spandex.io import logger
+from spandex.io import df_to_db, logger
 from spandex.spatialtoolz import conform_srids
 
 
@@ -90,3 +91,11 @@ loader.load_shp_map(shapefiles)
 # Fix invalid geometries and reproject.
 staging = loader.tables.staging
 conform_srids(loader.srid, schema=staging, fix=True)
+
+# Load county land use code mapping.
+csv = loader.get_path('built/parcel/2010/rtp13_processing_notes/lucodes.csv')
+df = pd.read_csv(csv, dtype=str)
+df.dropna(how='any', inplace=True,
+          subset=['county_id', 'land_use_type_id', 'development_type_id'])
+df.index.name = 'index'
+df_to_db(df, 'lucodes', schema=staging)
