@@ -113,9 +113,9 @@ def building_sqft(sqft='parcels_in.bldgsqft'):
 
 
 @out
-def non_residential_sqft(sqft='parcels_in.commsqft'):
+def non_residential_sqft(sqft='parcels_in.commlsqft_'):
     # Alternate inputs:
-    # - "commlsqft_"
+    # - "commsqft"
     return sqft.astype(float)
 
 
