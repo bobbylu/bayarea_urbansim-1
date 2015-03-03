@@ -88,3 +88,9 @@ print("SUMMARIZING: Generating data summaries.")
 
 # Output summary CSV files by county and TAZ.
 check_run('summaries.py')
+
+
+# print("SUMMARIZING: Exporting to UrbanCanvas.")
+
+# # Output buildings and parcels tables to UrbanCanvas.
+# check_run('urbancanvas.py')

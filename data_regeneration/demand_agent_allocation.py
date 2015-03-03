@@ -116,6 +116,8 @@ df = targetunits[['targetunits', 'hh', 'hh_allocated']]
 df['occupancy'] = df.hh*1.0/df.targetunits
 
 print df.head()
+summary_output_path = loader.get_path('out/regeneration/summaries/hh_summary.csv')
+df.to_csv(summary_output_path)
 
 
 
@@ -213,6 +215,8 @@ targetunits['job_spaces'] = buildings.groupby('taz').job_spaces.sum()
 df = targetunits[['job_spaces', 'jobs', 'jobs_allocated']]
 df['occupancy'] = df.jobs_allocated*1.0/df.job_spaces
 df['diff'] = df.jobs - df.job_spaces
+summary_output_path = loader.get_path('out/regeneration/summaries/emp_summary.csv')
+df.to_csv(summary_output_path)
 
 print df.head(50)
 

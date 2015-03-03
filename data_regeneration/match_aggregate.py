@@ -534,9 +534,7 @@ buildings2 = scl.scale_to_targets_from_table(buildings2, targets_residential_yea
 
 buildings2 = scl.scale_to_targets_from_table(buildings2, targets_non_residential_sqft)
 
-print buildings[buildings.building_sqft == 0].res_type.value_counts()  ##We have too empty blank residential parcels, which means that
-                                                                 ##residential imputation is not nuanced enough.
-#buildings[buildings.building_sqft == 0].residential_units.sum()
+print buildings[buildings.building_sqft == 0].res_type.value_counts()  
 print len(buildings2[(buildings2.building_sqft == 0) & (buildings2.res_type=='other')])
 
 
@@ -545,7 +543,9 @@ targetunits['sf'] = buildings2[buildings2.res_type == 'single'].groupby('taz').r
 targetunits['mf'] = buildings2[buildings2.res_type == 'multi'].groupby('taz').residential_units.sum()
 targetunits['nrsqft'] = buildings2.groupby('taz').non_residential_sqft.sum()
 print targetunits[['sf','targetSF','mf','targetMF', 'nrsqft', 'targetnonressqft']].head()
-targetunits[['sf','targetSF','mf','targetMF', 'nrsqft', 'targetnonressqft']].sum()  #Woohoo!
+targetunits[['sf','targetSF','mf','targetMF', 'nrsqft', 'targetnonressqft']].sum()
+summary_output_path = loader.get_path('out/regeneration/summaries/built_space_summary.csv')
+targetunits[['sf','targetSF','mf','targetMF', 'nrsqft', 'targetnonressqft']].to_csv(summary_output_path)
 
 
 #EXPORT BUILDILNGS TO DB
