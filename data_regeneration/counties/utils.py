@@ -48,6 +48,9 @@ def get_residential_units(tot_units, res_type):
     # even if mixed-use.
     units[res_type == 'multi'] = tot_units
     units[res_type == 'mixed'] = tot_units
+    
+    # If multi-family and zero units, assume one residential unit for now (leave further imputation to the imputation section).
+    units[(res_type == 'multi')& np.logical_or((units == 0), (units.isnull()))] = 1
 
     return units
 

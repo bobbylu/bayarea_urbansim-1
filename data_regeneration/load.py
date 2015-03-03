@@ -73,6 +73,9 @@ shapefiles = {
 
     'staging.taz':
     'juris/reg/zones/taz1454.shp',
+    
+    'staging.establishment_points':
+    'emp/micro/est10_gt1/est10_esri_gt1.shp',
 }
 
 

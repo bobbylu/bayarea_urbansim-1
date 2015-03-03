@@ -17,7 +17,7 @@ staging = loader.tables.staging
 # Use codes were classified manually because the assessor classifications
 # are meant for property tax purposes. These classifications should be
 # reviewed and revised.
-res_codes = {'single': ([1100] + range(1120, 1151) + range(1200, 1500) +
+res_codes = {'single': ([1100] + range(1120, 1151) + range(1200, 1501) +
                         range(1900, 2000)),
              'multi': (range(600, 1100) + [1700] + range(2000, 3000) +
                        range(5000, 5300) + range(7000, 7701) + [7800]),
@@ -140,6 +140,11 @@ def non_residential_sqft(building_sqft='parcels_out.building_sqft',
 def residential_units(tot_units='ie673.Units',
                       res_type='parcels_out.res_type'):
     return utils.get_residential_units(tot_units, res_type)
+    
+@out
+def condo_identifier():
+    code = ' '
+    return code
 
 
 @out

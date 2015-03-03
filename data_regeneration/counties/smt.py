@@ -154,6 +154,11 @@ def non_residential_sqft(building_sqft='parcels_out.building_sqft',
 def residential_units(res_type='parcels_out.res_type'):
     return utils.get_residential_units(tot_units=pd.Series(),
                                        res_type=res_type)
+                                       
+@out
+def condo_identifier():
+    code = ' '
+    return code
 
 
 @out
@@ -182,6 +187,7 @@ def export_smt(parcels_out):
     df = parcels_out.to_frame()
     assert df.index.is_unique
     assert not df.index.hasnans()
+    df.res_type[df.res_type.isnull()] = ''
     df_to_db(df, 'attributes_smt', schema=staging)
 
 sim.run(['export_smt'])

@@ -52,7 +52,6 @@ in2 = sim.column('parcels_in2', cache=True)
 def res_type2(land_use_type_id='parcels_in.use_code'):
     return utils.get_res_type(land_use_type_id, res_codes)
 
-
 @in2
 def building_sqft2(bldg_sqft='parcels_in.bldg_sqft', tla='parcels_in.tla'):
     # Alternate inputs:
@@ -67,12 +66,35 @@ def non_residential_sqft2(building_sqft='parcels_in2.building_sqft2',
                           residential_units='parcels_in2.residential_units2'):
     return utils.get_nonresidential_sqft(building_sqft, res_type,
                                          residential_units)
-
+                                         
 
 @in2
 def residential_units2(tot_units='parcels_in.units',
-                       res_type='parcels_in2.res_type2'):
-    return utils.get_residential_units(tot_units, res_type)
+                       res_type='parcels_in2.res_type2', land_use_type_id='parcels_in.use_code'):
+                       
+    units = pd.Series(index=res_type.index)
+    tot_units = tot_units.reindex(units.index, copy=False)
+    land_use_type_id = land_use_type_id.reindex(units.index, copy=False)
+
+    # If not residential, assume zero residential units.
+    units[res_type.isnull()] = 0
+
+    # If single family residential, assume one residential unit.
+    units[res_type == 'single'] = 1
+
+    # If non-single residential, assume all units are all residential,
+    # even if mixed-use.
+    units[res_type == 'multi'] = tot_units
+    units[res_type == 'mixed'] = tot_units
+
+    # Note in the points layer, certain condos and PUDs (as denoted by lutype 29)
+    # are split up into one record per residential unit with the unit column left
+    # unpopulated or as 0.  In such cases, we assign a value of 1 so that when 
+    # we group by parc_py_id, the resulting MF residential unit counts make sense,
+    # e.g. in Rossmoor.
+    units[land_use_type_id.isin(['29',])*np.logical_or((tot_units==0), tot_units.isnull())] = 1
+
+    return units
 
 
 ## Register output table.
@@ -159,8 +181,18 @@ def non_residential_sqft(non_residential_sqft=
 
 
 @out
-def residential_units(residential_units='parcels_in2.residential_units2'):
+def residential_units(parcels_in, residential_units='parcels_in2.residential_units2'):
     return regroup(residential_units).sum()
+    
+@out
+def condo_identifier(address='parcels_in.s_str_nbr', street='parcels_in.s_str_nm', zipcode='parcels_in.s_zip'):
+    address = regroup(address).first()
+    street = regroup(street).first()
+    zipcode = regroup(zipcode).first()
+    code = address + street + zipcode
+    code[code.isnull()] = ''
+    #code[code == ''] = None
+    return code
 
 
 @out
@@ -189,6 +221,7 @@ def export_cnc(parcels_out):
     df = parcels_out.to_frame()
     assert df.index.is_unique
     assert not df.index.hasnans
+    df.res_type[df.res_type.isnull()] = ''
     df_to_db(df, 'attributes_cnc', schema=staging)
 
 sim.run(['export_cnc'])

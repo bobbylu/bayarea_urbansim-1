@@ -6,7 +6,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_ala as a,
          (SELECT   apn_sort,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -17,7 +17,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn::int::text, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_cnc as a,
          (SELECT   parc_py_id,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -28,7 +28,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_mar as a,
          (SELECT   parcel,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -39,7 +39,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_nap as a,
          (SELECT   asmt,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -50,7 +50,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_scl as a,
          (SELECT   parcel,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -61,7 +61,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_sol as a,
          (SELECT   apn,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -72,7 +72,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_son as a,
          (SELECT   apn,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -84,7 +84,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_sfr as a,
          (SELECT   blklot,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -95,7 +95,7 @@ CREATE TABLE parcels AS (
   SELECT a.county_id, a.apn, a.parcel_id_local, a.land_use_type_id,
          a.res_type, a.land_value, a.improvement_value, a.year_assessed,
          a.year_built, a.building_sqft, a.non_residential_sqft,
-         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, p.geom
+         a.residential_units, a.sqft_per_unit, a.stories, a.tax_exempt, a.condo_identifier, p.geom
   FROM   staging.attributes_smt as a,
          (SELECT   apn,
                    ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom
@@ -111,7 +111,7 @@ SELECT UpdateGeometrySRID('parcels','geom',
   (SELECT Find_SRID('staging', 'parcels_ala', 'geom')));
 
 -- Add primary key column.
-ALTER TABLE parcels ADD COLUMN id serial PRIMARY KEY;
+ALTER TABLE parcels ADD COLUMN gid serial PRIMARY KEY;
 
 -- Add parcels table constraints.
 ALTER TABLE parcels ALTER COLUMN county_id SET DATA TYPE char(3);

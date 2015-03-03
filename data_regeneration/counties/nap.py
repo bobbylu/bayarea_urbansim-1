@@ -86,11 +86,6 @@ def land_use_type_id(code='parcels_in.landuse1'):
 
 
 @out
-def res_type():
-    pass
-
-
-@out
 def land_value(value='taxroll.CurrentMar'):
     # Alternate inputs:
     # - "CurrentNet"
@@ -132,9 +127,76 @@ def non_residential_sqft(sqft='buildings.SqFtOffice'):
     return sqft
 
 
+# @out
+# def residential_units(units='buildings.NumUnitsRe'):
+    # return units
+# @out
+# def residential_units(tot_units = 'buildings.NumUnitsRe', res_type = 'parcels_in.landuse1'):
+
+    # units = pd.Series(index=res_type.index)
+    # tot_units = tot_units.reindex(units.index, copy=False)
+    # units[tot_units > 0] = tot_units
+    
+    ## If single family residential and no current units, assume one residential unit.
+    # units[res_type.isin(['11','111'])*np.logical_or((tot_units==0), tot_units.isnull())] = 1
+    
+    # return units
+    
 @out
-def residential_units(units='buildings.NumUnitsRe'):
+def residential_units(tot_units = 'buildings.NumUnitsRe', res_type = 'parcels_in.landuse1'):
+
+    units = pd.Series(index=tot_units.index)
+    res_type = res_type.groupby(level=0).last()
+    res_type = res_type.reindex(tot_units.index, copy = False)
+    units[tot_units > 0] = tot_units
+    
+    # If single family residential and no current units, assume one residential unit.
+    units[res_type.isin(['11','111','05','23','31','32','39','312','313','314','315','322','323','324','325','392','393','394','395','3101','3201','3901','12'])*np.logical_or((tot_units==0), tot_units.isnull())] = 1
+    
+    # If land use implies 2 units and no current units, assume 2 residential units.
+    units[res_type.isin(['212', '3921', '2122'])*np.logical_or((tot_units==0), tot_units.isnull())] = 2
+    
+    # If land use implies 3 units and no current units, assume 3 residential units.
+    units[res_type.isin(['21','213','3931','2133'])*np.logical_or((tot_units==0), tot_units.isnull())] = 3
+    
+    # If land use implies 4 units and no current units, assume 4 residential units.
+    units[res_type.isin(['214', '3941', '2144'])*np.logical_or((tot_units==0), tot_units.isnull())] = 4
+    
+    # If land use implies 7 units and no current units, assume 7 residential units.
+    units[res_type.isin(['215'])*np.logical_or((tot_units==0), tot_units.isnull())] = 7
+    
+    # If land use implies 14 units and no current units, assume 14 residential units.
+    units[res_type.isin(['216'])*np.logical_or((tot_units==0), tot_units.isnull())] = 14
+    
+    # If land use implies 30 units and no current units, assume 30 residential units.
+    units[res_type.isin(['217'])*np.logical_or((tot_units==0), tot_units.isnull())] = 30
+
+    # If land use implies 50 units and no current units, assume 50 residential units.
+    units[res_type.isin(['218'])*np.logical_or((tot_units==0), tot_units.isnull())] = 50
+    
     return units
+    
+@out
+def res_type(tot_units = 'buildings.NumUnitsRe', res_type = 'parcels_in.landuse1'):
+
+    units = pd.Series(index=tot_units.index)
+    res_type = res_type.groupby(level=0).last()
+    res_type = res_type.reindex(tot_units.index, copy = False)
+    
+    # If single family residential
+    res_type[res_type.isin(['11','111','05','23','31','32','39','312','313','314','315','322','323','324','325','392','393','394','395','3101','3201','3901','12'])] = 'single'
+    
+    # If multifamily
+    res_type[res_type.isin(['212', '3921', '2122','21','213','3931','2133','214', '3941', '2144','215','216','217','218'])] = 'multi'
+
+    res_type[~res_type.isin(['single','multi'])] = 'other'
+    
+    return res_type
+    
+@out
+def condo_identifier():
+    code = ' '
+    return code
 
 
 @out

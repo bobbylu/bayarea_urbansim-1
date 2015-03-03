@@ -125,8 +125,16 @@ def residential_units(res_type='parcels_out.res_type'):
 
     # If single family residential, assume one residential unit.
     units[res_type == 'single'] = 1
+    
+    # If multi family residential, assume one residential unit for now too (leave further assumed additions to the imputation section).
+    units[res_type == 'multi'] = 1
 
     return units
+    
+@out
+def condo_identifier():
+    code = ' '
+    return code
 
 
 @out

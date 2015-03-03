@@ -25,13 +25,11 @@ def check_run(filename):
 
 print("PREPROCESSING: Loading shapefiles by county.")
 
-
 # Load shapefile data inputs, fix invalid geometries, and reproject.
 check_run('load.py')
 
 
 print("PROCESSING: Loading parcel attributes by county.")
-
 
 # Run county attribute processing scripts.
 county_names = ['ala', 'cnc', 'mar', 'nap', 'scl', 'sfr', 'smt', 'sol', 'son']
@@ -42,24 +40,51 @@ for name in county_names:
 
 print("PROCESSING: Combining to create regional parcels table.")
 
-
 # Join the county attributes and geometries and union the counties together.
 loader = TableLoader()
 sql_path = os.path.join(root_path, 'join_counties.sql')
 with open(sql_path) as sql:
     with loader.database.cursor() as cur:
         cur.execute(sql.read())
+        
+        
+print("PROCESSING: Aggregating condos and stacked parcels.")
+        
+# Aggregate parcels for multi-geometry representation of buildings
+check_run('geom_aggregation.py')
 
 
-print("POSTPROCESSING: Applying spatial operations.")
+print("PROCESSING: Imputing attributed based on POINT data sources.")
+        
+# Applying information based on Redfin, Costar, employment points etc.
+check_run('point_based_imputation.py')
 
 
-# Apply spatial operations.
+print("POSTPROCESSING: Applying spatial operations: tag with location identifiers.")
+
+# Apply spatial operations to append location identifiers.
 check_run('spatialops.py')
 
 
-print("SUMMARIZING: Generating data summaries.")
+print("PROCESSING: Synthesizing/scaling to match aggregate zonal totals.")
 
+# Matching aggregate zonal totals
+check_run('match_aggregate.py')
+
+
+print("PROCESSING: Adding/populating price fields to the building table.")
+
+# Imputing base-year residential and non-residential prices
+check_run('price_imputation.py')
+
+
+print("PROCESSING: Allocating households and jobs to buildings.")
+
+# Allocating households and jobs to buildings
+check_run('demand_agent_allocation.py')
+
+
+print("SUMMARIZING: Generating data summaries.")
 
 # Output summary CSV files by county and TAZ.
 check_run('summaries.py')

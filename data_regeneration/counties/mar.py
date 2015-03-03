@@ -136,6 +136,11 @@ def residential_units(tot_units='parcels_in.exunits',
     # - "unitsnumbe"
     # - "b_units"
     return utils.get_residential_units(tot_units, res_type)
+    
+@out
+def condo_identifier():
+    code = ' '
+    return code
 
 
 @out
@@ -165,6 +170,7 @@ def export_mar(parcels_out):
     df = parcels_out.to_frame()
     assert df.index.is_unique
     assert not df.index.hasnans()
+    df.res_type[df.res_type.isnull()] = ''
     df_to_db(df, 'attributes_mar', schema=staging)
 
 sim.run(['export_mar'])

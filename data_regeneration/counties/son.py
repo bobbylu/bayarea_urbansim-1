@@ -54,6 +54,7 @@ def abag():
 
     assert df.index.is_unique
     assert not df.index.hasnans()
+
     return df
 
 
@@ -135,6 +136,21 @@ def residential_units(tot_units='abag.Units',
                       res_type='parcels_out.res_type'):
     return utils.get_residential_units(tot_units, res_type)
 
+@out
+def condo_identifier(merged_situs = 'abag.MergedSitus', year_built = 'abag.YearBuilt', city_code = 'abag.SitusCityCode', lu_code = 'abag.LandUse'):
+    
+    merged_situs[merged_situs.str.len() < 8] = '        '
+    merged_situs[merged_situs.isnull()] = '        '
+    merged_situs = merged_situs.str.slice(0,8)
+    lu_code[lu_code.str.len() != 4] = '9999'
+    lu_code[lu_code.isnull()] = '9999'
+    year_built[year_built.isnull()] = 9999
+    year_built[year_built == 0] = 8888
+    year_built = year_built.astype('str')
+    city_code[city_code.isnull()] = '  '
+    code = merged_situs + lu_code + year_built + city_code
+    code[code.isnull()] = ''
+    return code
 
 @out
 def sqft_per_unit(building_sqft='parcels_out.building_sqft',

@@ -122,6 +122,11 @@ def non_residential_sqft(sqft='parcels_in.commlsqft_'):
 @out
 def residential_units(units='parcels_in.resunits'):
     return units
+    
+@out
+def condo_identifier():
+    code = ' '
+    return code
 
 
 @out

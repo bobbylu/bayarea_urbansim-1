@@ -85,7 +85,12 @@ def land_use_type_id(code='scvta.STD_USE_CO'):
     code[code == ''] = None
     return code
 
-
+@out
+def condo_identifier(address='scvta.SITE_HOUSE', street='scvta.SITE_STREE', zipcode='scvta.SITE_ZIP'):
+    code = address + street + zipcode.astype('str')
+    code[code == ''] = None
+    return code
+    
 @out
 def res_type(land_use_type_id='parcels_out.land_use_type_id'):
     return utils.get_res_type(land_use_type_id, res_codes)
@@ -139,15 +144,33 @@ def non_residential_sqft(building_sqft='parcels_out.building_sqft',
 
 
 @out
-def residential_units(tot_units='scvta.NUMBER_OF_',
-                      res_type='parcels_out.res_type'):
+def residential_units(tot_units='scvta.NUMBER_OF1',
+                      res_type='parcels_out.res_type', land_use_type_id='parcels_out.land_use_type_id'):
     # Alternate inputs:
     # - NUMBER_O_1
     # - NUMBER_O_2
     # - NUMBER_O_3
-    # We assume "NUMBER_OF_" is number of units, but are not certain.
+    # We previously assumed "NUMBER_OF_" is number of units, but are not certain.
     # Some values are unreasonably high (e.g., 9100).
-    return utils.get_residential_units(tot_units, res_type)
+    # Now we assume "NUMBER_OF1" is number of residential units.  The values are much more reasonable.
+    
+    units = pd.Series(index=res_type.index)
+    tot_units = tot_units.reindex(units.index, copy=False)
+    land_use_type_id = land_use_type_id.reindex(units.index, copy=False)
+
+    # If not residential, assume zero residential units.
+    units[res_type.isnull()] = 0
+
+    # If single family residential, assume one residential unit.
+    units[res_type == 'single'] = 1
+
+    # If non-single residential, assume all units are all residential,
+    # even if mixed-use.
+    units[res_type == 'multi'] = tot_units
+    units[res_type == 'mixed'] = tot_units
+    units[land_use_type_id.isin(['RCON',])*np.logical_or((tot_units==0), tot_units.isnull())] = 1
+
+    return units
 
 
 @out
