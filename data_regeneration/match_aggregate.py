@@ -395,6 +395,11 @@ parcels.development_type_id.value_counts()
 parcels.county_id[parcels.county_id==' '] = 0
 parcels.county_id = parcels.county_id.astype('int')
 
+#SF-specific devtype correction due to residential sometimes being mistakenly coded as RT
+parcels.development_type_id[(parcels.county_id == 75) & (parcels.res_type == 'single') & (parcels.development_type_id == 'RT')] = 'SF'
+parcels.development_type_id[(parcels.county_id == 75) & (parcels.res_type == 'multi') & (parcels.development_type_id == 'RT')] = 'MF'
+
+
 ##############
 ###BUILDINGS##
 ##############
@@ -509,7 +514,7 @@ print buildings2.development_type_id.value_counts()
 ##SCALING###
 ############
 
-##Scaling for zonal targets:  TODO-  scale residential prices once the price column is created/populated
+##Scaling for zonal targets:  (note:  scaling residential prices takes place in price_imputation)
 
 targets_residential_year_built = pd.DataFrame(
     {'column_name': ['year_built']*len(targetvalues),
@@ -528,7 +533,6 @@ targets_non_residential_sqft = pd.DataFrame(
      'clip_low': [np.nan]*len(targetunits),
      'clip_high': [np.nan]*len(targetunits),
      'int_result': [np.nan]*len(targetunits)})
-
 
 buildings2 = scl.scale_to_targets_from_table(buildings2, targets_residential_year_built)
 
