@@ -4,6 +4,7 @@ import pandas.io.sql as sql
 from spandex import TableLoader
 from spandex.io import exec_sql,  df_to_db
 from spandex.targets import scaling as scl
+import hashlib
 
 #Connect to the database
 loader = TableLoader()
@@ -285,7 +286,7 @@ print new_res_buildings_df.groupby('county_id').residential_units.sum()
 print new_nonres_buildings_df.groupby('county_id').non_residential_sqft.sum()
 
 
-##Deal with parcels where development type id is unkown, imputing using Costar/Redfin
+##Deal with parcels where development type id is unknown, imputing using Costar/Redfin
 problematic = parcels[parcels.development_type_id.isnull() & (parcels.res_type=='other')][['county_id','improvement_value','year_built','stories','sqft_per_unit','residential_units','non_residential_sqft','building_sqft','res_type','land_use_type_id','development_type_id','redfin_home_type', 'costar_property_type','costar_secondary_type']]
 ##Where no dev type, but we can get dev type from costar, then use costar for the dev type!
 
@@ -555,12 +556,25 @@ targetunits[['sf','targetSF','mf','targetMF', 'nrsqft', 'targetnonressqft']].to_
 #EXPORT BUILDILNGS TO DB
 df_to_db(buildings2, 'buildings', schema=loader.tables.public)
 
+
+##Create geom_id (serves similar purpose to joinnumA) on parcels based on integer representation of geometry hash
+idx = []
+geom_hashes = []
+for i, geom in parcels.geom.iteritems():
+    idx.append(i)
+    md5_hash = str(hashlib.md5(geom).hexdigest())
+    geom_hashes.append(int(md5_hash[0:11], 16))
+    
+parcel_identifier = pd.Series(geom_hashes, index = idx)
+parcels['geom_id'] = parcel_identifier
+
+
 #EXPORT PARCELS TO DB
 parcels['parcel_acres'] = parcels.calc_area/4046.86
 parcels['zoning_id'] = 0
 parcels['taz_id'] = parcels.taz
 parcels['tax_exempt_status'] = parcels.tax_exempt
-parcels2 = parcels[['development_type_id', 'land_value', 'parcel_acres', 'county_id', 'taz_id', 'zoning_id', 'proportion_undevelopable', 'tax_exempt_status', 'apn', 'parcel_id_local']]
+parcels2 = parcels[['development_type_id', 'land_value', 'parcel_acres', 'county_id', 'taz_id', 'zoning_id', 'proportion_undevelopable', 'tax_exempt_status', 'apn', 'parcel_id_local', 'geom_id']]
 devtype_devid_xref = {'SF':1, 'MF':2, 'MFS':3, 'MH':4, 'MR':5, 'GQ':6, 'RT':7, 'BR':8, 'HO':9, 'OF':10, 'OR':11, 'HP':12, 'IW':13, 
                       'IL':14, 'IH':15, 'VY':16, 'SC':17, 'SH':18, 'GV':19, 'VP':20, 'PG':21, 'PL':22, 'AP':23, 'LD':24, 'other':-1}
 for dev in devtype_devid_xref.keys():

@@ -46,6 +46,7 @@ alternatives = alternatives.ix[np.repeat(empty_units.index.values,empty_units.va
 
 taz_hh_counts = hh.groupby(hh_zone_id_field_name).size()
 
+##Allocate agents for each zone
 for taz in np.unique(hh[hh_zone_id_field_name]):
     num_hh = taz_hh_counts[taz_hh_counts.index.values==taz].values[0]
     chooser_ids = hh.index[hh[hh_zone_id_field_name]==taz].values

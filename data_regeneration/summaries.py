@@ -45,6 +45,7 @@ exec_sql("""
 alter table parcel add geom geometry(MultiPolygon); 
 SELECT UpdateGeometrySRID('parcel', 'geom', 2768);
 update parcel set geom = a.geom from parcels a where parcel.parcel_id = a.gid;
+update parcel set geom_id = parcel_id where geom is null;
 """)
 
 ##  Export parcel shapefile to output directory
