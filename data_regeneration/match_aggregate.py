@@ -173,6 +173,70 @@ def add_or_remove_mf_units(zone_id, mf_difference, observed_mf_units):
         mf_difference = abs(mf_difference)
         print '        *Removing %s multi-family DU.' % mf_difference
         remove_mf_units(zone_id, mf_difference)
+        
+def flip_from_sf_to_mf_type(zone_id, number_of_units, observed_mf_units):
+    print '        Trying to flilp %s single-family units to multi-family' % number_of_units
+    
+    sf_flip_alternatives = sf_parcels_loc[zone_id].residential_units.order(ascending = True)
+    cumsum_idx = sf_flip_alternatives.cumsum().searchsorted(number_of_units)
+    
+    sampled_res_buildings = 0
+    sampled_res_buildings1 = sf_flip_alternatives[:(cumsum_idx)]
+    sampled_res_buildings2 = sf_flip_alternatives[:(cumsum_idx + 1)]
+    
+    if (sampled_res_buildings2.sum() > 0) & (sampled_res_buildings2.sum() <= number_of_units):
+        sampled_res_buildings = sampled_res_buildings2
+    elif (sampled_res_buildings1.sum() > 0) & (sampled_res_buildings1.sum() <= number_of_units):
+        sampled_res_buildings = sampled_res_buildings1
+        
+    if type(sampled_res_buildings) is int:
+        add_or_remove_mf_units(zone_id, number_of_units, observed_mf_units)
+        return number_of_units
+    else:
+        #Remove from sf_parcels_loc
+        buildings_to_drop = zip([zone_id,]*len(sampled_res_buildings), sampled_res_buildings.index)
+        sf_parcels_loc.obj = sf_parcels_loc.obj.drop(buildings_to_drop)
+
+        #Edit parcels so these are mf buildings
+        parcels.res_type.loc[sampled_res_buildings.index.values] = 'multi'
+        parcels.development_type_id.loc[sampled_res_buildings.index.values] = 'MF'
+        
+        print '        Flipped %s single-family units to multi-family' % sampled_res_buildings.sum()
+        if (number_of_units - sampled_res_buildings.sum()) > 0:
+            add_or_remove_mf_units(zone_id, number_of_units - sampled_res_buildings.sum(), observed_mf_units)
+        return number_of_units - sampled_res_buildings.sum()
+
+def flip_from_mf_to_sf_type(zone_id, number_of_units, observed_sf_units):
+    print '        Trying to flip %s multi-family units to single-family' % number_of_units
+    
+    mf_flip_alternatives = mf_parcels_loc[zone_id].residential_units.order(ascending = True)
+    cumsum_idx = mf_flip_alternatives.cumsum().searchsorted(number_of_units)
+    
+    sampled_res_buildings = 0
+    sampled_res_buildings1 = mf_flip_alternatives[:(cumsum_idx)]
+    sampled_res_buildings2 = mf_flip_alternatives[:(cumsum_idx + 1)]
+    
+    if (sampled_res_buildings2.sum() > 0) & (sampled_res_buildings2.sum() <= number_of_units):
+        sampled_res_buildings = sampled_res_buildings2
+    elif (sampled_res_buildings1.sum() > 0) & (sampled_res_buildings1.sum() <= number_of_units):
+        sampled_res_buildings = sampled_res_buildings1
+        
+    if type(sampled_res_buildings) is int:
+        add_or_remove_sf_units(zone_id, number_of_units, observed_sf_units)
+        return number_of_units
+    else:
+        #Remove from mf_parcels_loc
+        buildings_to_drop = zip([zone_id,]*len(sampled_res_buildings), sampled_res_buildings.index)
+        mf_parcels_loc.obj = mf_parcels_loc.obj.drop(buildings_to_drop)
+
+        #Edit parcels so these are sf buildings
+        parcels.res_type.loc[sampled_res_buildings.index.values] = 'single'
+        parcels.development_type_id.loc[sampled_res_buildings.index.values] = 'SF'
+        
+        print '        Flipped %s multi-family units to single-family' % sampled_res_buildings.sum()
+        if (number_of_units - sampled_res_buildings.sum()) > 0:
+            add_or_remove_sf_units(zone_id, number_of_units - sampled_res_buildings.sum(), observed_sf_units)
+        return number_of_units - sampled_res_buildings.sum()
 
 
 #NRSQFT imputation based on estab sites to match aggregate totals
@@ -254,12 +318,68 @@ for taz_du in zonal_residential_unit_controls.iterrows():
         print '            Target difference:  %s single-family DU.' % (sf_difference)
         print '            Target difference:  %s multi-family DU.' % (mf_difference)
         
-        #Impute as needed to cover difference
-        if sf_difference != 0:
-            add_or_remove_sf_units(zone_id, sf_difference, observed_sf_units)
+        ####Impute as needed to cover difference
+        
+        # Imputation is needed somewhere
+        if (sf_difference != 0) | (mf_difference != 0):
             
-        if mf_difference != 0:
-            add_or_remove_mf_units(zone_id, mf_difference, observed_mf_units)
+            # One of the residential categories requires no imputation
+            if (sf_difference == 0) | (mf_difference == 0):
+            
+                if sf_difference != 0:
+                    add_or_remove_sf_units(zone_id, sf_difference, observed_sf_units)
+
+                if mf_difference != 0:
+                    add_or_remove_mf_units(zone_id, mf_difference, observed_mf_units)
+                
+            # Both residential categories require imputation
+            else:
+                net_difference = sf_difference + mf_difference
+                
+                # Both residential categories require additions, or both require subtractions
+                if ((sf_difference > 0) & (mf_difference > 0)) | ((sf_difference < 0) & (mf_difference < 0)):
+                    add_or_remove_sf_units(zone_id, sf_difference, observed_sf_units)
+                    add_or_remove_mf_units(zone_id, mf_difference, observed_mf_units)
+                    
+                # Single-family requires subtractions, and multi-family requires additions
+                elif (sf_difference < 0) & (mf_difference > 0):
+                    # If |decrease| in single-family units exceeds |increase| in multi-family units
+                    if  abs(sf_difference) > abs(mf_difference):
+                        # Take subset of the single-family decrease corresponding to the mult-family increase, and flip the type
+                        remainder = flip_from_sf_to_mf_type(zone_id, mf_difference, observed_mf_units)
+                        # Take rest of the single-family decrease, and remove these units, but only from among non-type-flipped parcels
+                        add_or_remove_sf_units(zone_id, net_difference - remainder, observed_sf_units - (mf_difference - remainder))
+                    # If |decrease| in single-family units is less than or equal to |increase| in multi-family units
+                    elif abs(sf_difference) <= abs(mf_difference):
+                        # Take all of the single-family decrease, and flip their type
+                        remainder = flip_from_sf_to_mf_type(zone_id, abs(sf_difference), observed_mf_units)
+                        # Take rest of the multifamily-increase, if any remains, and add units
+                        if net_difference > 0:
+                            add_or_remove_mf_units(zone_id, net_difference, observed_mf_units)
+                        # If not all singlefamily could be type-flipped, then remove units
+                        if remainder > 0:
+                            allocated = abs(sf_difference) - remainder
+                            add_or_remove_sf_units(zone_id, -remainder, observed_sf_units - allocated)
+                            
+                # Multi-family requires subtractions, and single-family requires additions
+                elif (mf_difference < 0) & (sf_difference > 0):
+                    # If |decrease| in multi-family units exceeds |increase| in single-family units
+                    if abs(mf_difference) > abs(sf_difference):
+                        # Take subset of the multi-family decrease corresponding to the single-family increase, and flip the type
+                        remainder = flip_from_mf_to_sf_type(zone_id, sf_difference, observed_sf_units)
+                        # Take rest of the multi-family decrease, and remove these units, but only from among non-type-flipped parcels
+                        add_or_remove_mf_units(zone_id, net_difference - remainder, observed_mf_units - (sf_difference - remainder))
+                    # If |decrease| in multi-family units is less than or equal to |increase| in single-family units
+                    elif abs(mf_difference) <= abs(sf_difference):
+                        # Take all of the multi-family decrease, and flip their type
+                        remainder = flip_from_mf_to_sf_type(zone_id, abs(mf_difference), observed_sf_units)
+                        # Take rest of the single-increase, if any remains, and add units
+                        if net_difference > 0:
+                            add_or_remove_sf_units(zone_id, net_difference, observed_sf_units)
+                        # If not all multifamily could be type-flipped, then remove units
+                        if remainder > 0:
+                            allocated = abs(mf_difference) - remainder
+                            add_or_remove_mf_units(zone_id, -remainder, observed_mf_units - allocated)
         
     else:
         #TAZ currently has ZERO parcels, add an artificial parcel
