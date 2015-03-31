@@ -238,7 +238,7 @@ df_to_db(hh, 'households', schema=loader.tables.public)
 #EXPORT BUILDING TABLE BACK TO DB
 buildings['residential_sqft'] = buildings.residential_units * buildings.sqft_per_unit
 buildings2 = buildings[['parcel_id', 'development_type_id', 'improvement_value', 'residential_units', 
-                        'residential_sqft', 'sqft_per_unit', 'non_residential_sqft', 'nonres_rent_per_sqft', 'res_price_per_sqft', 'stories', 'year_built',
+                        'residential_sqft', 'sqft_per_unit', 'non_residential_sqft', 'building_sqft', 'nonres_rent_per_sqft', 'res_price_per_sqft', 'stories', 'year_built',
                         'redfin_sale_price', 'redfin_sale_year', 'redfin_home_type', 'costar_property_type', 'costar_rent']]
 devtype_devid_xref = {'SF':1, 'MF':2, 'MFS':3, 'MH':4, 'MR':5, 'GQ':6, 'RT':7, 'BR':8, 'HO':9, 'OF':10, 'OR':11, 'HP':12, 'IW':13, 
                       'IL':14, 'IH':15, 'VY':16, 'SC':17, 'SH':18, 'GV':19, 'VP':20, 'PG':21, 'PL':22, 'AP':23, 'LD':24, 'other':-1}

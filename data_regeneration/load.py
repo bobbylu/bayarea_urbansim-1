@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 from spandex import TableLoader
-from spandex.io import df_to_db, logger
+from spandex.io import df_to_db, exec_sql, logger
 from spandex.spatialtoolz import conform_srids
 
 
@@ -102,3 +102,9 @@ df.dropna(how='any', inplace=True,
           subset=['county_id', 'land_use_type_id', 'development_type_id'])
 df.index.name = 'index'
 df_to_db(df, 'lucodes', schema=staging)
+
+# Add county land use code mapping unique constraint.
+exec_sql("""
+ALTER TABLE staging.lucodes ADD CONSTRAINT lucodes_unique
+UNIQUE (county_id, land_use_type_id);
+""")

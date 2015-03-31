@@ -4,6 +4,11 @@ from spandex.io import exec_sql
 
 loader = TableLoader()
 
+################
+#### Approach 1:  Merge geometries (and aggregate attributes) based on a common identifier
+################
+print 'PARCEL AGGREGATION:  Merge geometries (and aggregate attributes) based on a common identifier'
+
 exec_sql("""
 -- SCL
 drop table if exists condos_scl;
@@ -27,6 +32,7 @@ max(tax_exempt) as tax_exempt,
 condo_identifier,
 ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom,
 max(gid) as gid,
+'merged'  as imputation_flag,
 max(development_type_id) as development_type_id
 into condos_scl
 FROM parcels
@@ -59,6 +65,7 @@ max(tax_exempt) as tax_exempt,
 condo_identifier,
 ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom,
 max(gid) as gid,
+'merged'  as imputation_flag,
 max(development_type_id) as development_type_id
 into condos_cnc
 FROM parcels
@@ -92,6 +99,7 @@ max(tax_exempt) as tax_exempt,
 condo_identifier,
 ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom,
 max(gid) as gid,
+'merged'  as imputation_flag,
 max(development_type_id) as development_type_id
 into condos_son
 FROM parcels
@@ -103,6 +111,11 @@ delete from parcels where county_id = '097' AND length(condo_identifier)>3 and r
 insert into parcels select * from condos_son;
 """)
 
+
+################
+#### Approach 2:  Merge geometries (and aggregate attributes) based on within-interior-ring status
+################
+print 'PARCEL AGGREGATION:  Merge geometries (and aggregate attributes) based on within-interior-ring status'
 
 exec_sql("""
 drop table if exists unfilled;
@@ -205,6 +218,7 @@ max(tax_exempt) as tax_exempt,
 max(condo_identifier) as condo_identifier,
 ST_CollectionExtract(ST_Multi(ST_Union(geom)), 3) AS geom,
 max(gid) as gid,
+'merged'  as imputation_flag,
 max(development_type_id) as development_type_id
 FROM a
 GROUP BY parent_gid
@@ -214,10 +228,12 @@ select * from b;
 """)
 
 
-##Collapse stacked parcels
+################
+#### Approach 3:  Merge geometries (and aggregate attributes) if duplicate stacked parcel geometry
+################
+print 'PARCEL AGGREGATION:  Merge geometries (and aggregate attributes) if duplicate stacked parcel geometry'
 
 print 'Collapsing and aggregating stacked parcels'
-
 exec_sql("""
 drop table if exists stacked;
 drop table if exists stacked_merged;
@@ -245,6 +261,7 @@ max(tax_exempt) as tax_exempt,
 max(condo_identifier) as condo_identifier,
 geom,
 max(gid) as gid,
+'merged'  as imputation_flag,
 max(development_type_id) as development_type_id
 into stacked_merged
 FROM stacked

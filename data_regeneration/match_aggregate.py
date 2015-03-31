@@ -71,10 +71,11 @@ def add_parcel(zone_id):
     new_pid = parcels.index.max() + 1
     parcels.loc[new_pid] = None
     parcels.taz.loc[new_pid] = zone_id  ##Should also append a specific county_id, but need a taz-county xref
+    parcels.imputation_flag.loc[new_pid] = 'synthetic'
     for col in parcels.dtypes.iteritems():
         col_name = col[0]
         col_type = col[1]
-        if col_name != 'taz':
+        if (col_name != 'taz') & (col_name != 'imputation_flag'):
             if col_name == 'county_id':
                 parcels[col_name].loc[new_pid] = 0
             elif col_type == 'object':
@@ -200,6 +201,7 @@ def flip_from_sf_to_mf_type(zone_id, number_of_units, observed_mf_units):
         #Edit parcels so these are mf buildings
         parcels.res_type.loc[sampled_res_buildings.index.values] = 'multi'
         parcels.development_type_id.loc[sampled_res_buildings.index.values] = 'MF'
+        parcels.imputation_flag.loc[sampled_res_buildings.index] = parcels.imputation_flag.loc[sampled_res_buildings.index] + ', restype_flip'  ## Populate imputation flag for affected records
         
         print '        Flipped %s single-family units to multi-family' % sampled_res_buildings.sum()
         if (number_of_units - sampled_res_buildings.sum()) > 0:
@@ -232,6 +234,7 @@ def flip_from_mf_to_sf_type(zone_id, number_of_units, observed_sf_units):
         #Edit parcels so these are sf buildings
         parcels.res_type.loc[sampled_res_buildings.index.values] = 'single'
         parcels.development_type_id.loc[sampled_res_buildings.index.values] = 'SF'
+        parcels.imputation_flag.loc[sampled_res_buildings.index] = parcels.imputation_flag.loc[sampled_res_buildings.index] + ', restype_flip'  ## Populate imputation flag for affected records
         
         print '        Flipped %s multi-family units to single-family' % sampled_res_buildings.sum()
         if (number_of_units - sampled_res_buildings.sum()) > 0:
@@ -277,6 +280,7 @@ for rec in nonres_sqft_zone.iterrows():
 ####Summarize NRSQFT change
 print parcels.groupby('county_id').non_residential_sqft.sum()
 parcels.non_residential_sqft.loc[nonres_parcel_updates.index] = parcels.non_residential_sqft.loc[nonres_parcel_updates.index].fillna(0) + nonres_parcel_updates.values
+parcels.imputation_flag.loc[nonres_parcel_updates.index] = parcels.imputation_flag.loc[nonres_parcel_updates.index] + ', estab_sqft'  ## Populate imputation flag for affected records
 print parcels.groupby('county_id').non_residential_sqft.sum()
 
 
@@ -392,6 +396,7 @@ for taz_du in zonal_residential_unit_controls.iterrows():
             
 print parcels.groupby('county_id').residential_units.sum()
 parcels.residential_units.loc[res_parcel_updates.index] = parcels.residential_units.loc[res_parcel_updates.index].fillna(0) + res_parcel_updates.values
+parcels.imputation_flag.loc[res_parcel_updates.index] = parcels.imputation_flag.loc[res_parcel_updates.index] + ', du_zonetarget'  ## Populate imputation flag for affected records
 print parcels.groupby('county_id').residential_units.sum()
 
 
@@ -452,7 +457,7 @@ costar_devtype_map = {'Retail':'RT',
 for costar_type in costar_devtype_map.keys():
     idx = problematic_nonres[problematic_nonres.costar_property_type == costar_type].index.values
     parcels.development_type_id.loc[idx] = costar_devtype_map[costar_type]
-    
+    parcels.imputation_flag.loc[idx] = parcels.imputation_flag.loc[idx] + ', costar_type'
     
 #Map between redfin types and res_type categories
 redfin_devtype_map1 = {'Single Family Residential':'single',
@@ -480,6 +485,7 @@ redfin_devtype_map2 = {'Single Family Residential':'SF',
 
 for redfin_type in redfin_devtype_map1.keys():
     idx = problematic_res[problematic_res.redfin_home_type == redfin_type].index.values
+    parcels.imputation_flag.loc[idx] = parcels.imputation_flag.loc[idx] + ', redfin_type'
     parcels.res_type.loc[idx] = redfin_devtype_map1[redfin_type]
 
 for redfin_type in redfin_devtype_map2.keys():
@@ -662,6 +668,9 @@ buildings2 = scl.scale_to_targets_from_table(buildings2, targets_non_residential
 print buildings[buildings.building_sqft == 0].res_type.value_counts()  
 print len(buildings2[(buildings2.building_sqft == 0) & (buildings2.res_type=='other')])
 
+# Post scaling bound-checking
+buildings2.year_built[buildings2.year_built > year_built_upper_bound] = year_built_upper_bound
+
 
 #COMPARE WITH TARGETS
 targetunits['sf'] = buildings2[buildings2.res_type == 'single'].groupby('taz').residential_units.sum()
@@ -689,12 +698,12 @@ parcel_identifier = pd.Series(geom_hashes, index = idx)
 parcels['geom_id'] = parcel_identifier
 
 
-#EXPORT PARCELS TO DB
+#EXPORT PROCESSED PARCELS TO DB
 parcels['parcel_acres'] = parcels.calc_area/4046.86
 parcels['zoning_id'] = 0
 parcels['taz_id'] = parcels.taz
 parcels['tax_exempt_status'] = parcels.tax_exempt
-parcels2 = parcels[['development_type_id', 'land_value', 'parcel_acres', 'county_id', 'taz_id', 'zoning_id', 'proportion_undevelopable', 'tax_exempt_status', 'apn', 'parcel_id_local', 'geom_id']]
+parcels2 = parcels[['development_type_id', 'land_value', 'parcel_acres', 'county_id', 'taz_id', 'zoning_id', 'proportion_undevelopable', 'tax_exempt_status', 'apn', 'parcel_id_local', 'geom_id', 'imputation_flag']]
 devtype_devid_xref = {'SF':1, 'MF':2, 'MFS':3, 'MH':4, 'MR':5, 'GQ':6, 'RT':7, 'BR':8, 'HO':9, 'OF':10, 'OR':11, 'HP':12, 'IW':13, 
                       'IL':14, 'IH':15, 'VY':16, 'SC':17, 'SH':18, 'GV':19, 'VP':20, 'PG':21, 'PL':22, 'AP':23, 'LD':24, 'other':-1}
 for dev in devtype_devid_xref.keys():
@@ -708,3 +717,28 @@ parcels2.parcel_acres[parcels2.parcel_acres.isnull()] = 2.5
 parcels2.index.name = 'parcel_id'
 
 df_to_db(parcels2, 'parcel', schema=loader.tables.public)
+
+# Attach geom to the processed parcels
+print 'Attaching geometry to the processed parcels'
+exec_sql("""
+alter table parcel add geom geometry(MultiPolygon); 
+SELECT UpdateGeometrySRID('parcel', 'geom', 2768);
+update parcel set geom = a.geom from parcels a where parcel.parcel_id = a.gid;
+update parcel set geom_id = parcel_id where geom is null;
+""")
+
+# Create spatial index.
+print 'Spatially indexing the processed parcels'
+exec_sql("""
+CREATE INDEX parcel_geom_gist ON parcel
+  USING gist (geom);
+""")
+
+#Add XY coords to processed parcels
+print 'Add x and y coords on the processed parcels'
+exec_sql("alter table parcel add centroid geometry;")
+exec_sql("update parcel set centroid = ST_centroid(geom);")
+exec_sql('ALTER TABLE parcel ADD x numeric;')
+exec_sql('ALTER TABLE parcel ADD y numeric;')
+exec_sql("update parcel set x = ST_X(ST_Transform(centroid, 4326));")
+exec_sql("update parcel set y = ST_Y(ST_Transform(centroid, 4326));")

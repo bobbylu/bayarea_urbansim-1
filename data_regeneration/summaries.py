@@ -41,12 +41,8 @@ parcel_output_dir = loader.get_path('out/regeneration/summaries/parcels')
 config = load_config()
 db_config = dict(config.items('database'))
 
-exec_sql("""
-alter table parcel add geom geometry(MultiPolygon); 
-SELECT UpdateGeometrySRID('parcel', 'geom', 2768);
-update parcel set geom = a.geom from parcels a where parcel.parcel_id = a.gid;
-update parcel set geom_id = parcel_id where geom is null;
-""")
+exec_sql("ALTER TABLE parcel RENAME COLUMN taz_id to zone_id;")
+exec_sql("ALTER TABLE parcel RENAME COLUMN parcel_acres to acres;")
 
 ##  Export parcel shapefile to output directory
 os.system('pgsql2shp -f "%s" -h %s -u %s -P %s %s parcel' % (parcel_output_dir, db_config['host'], db_config['user'], db_config['password'], db_config['database']))
@@ -61,15 +57,3 @@ def db_to_df(query):
     
 buildings = db_to_df('select * from building').set_index('building_id')
 buildings.to_csv(building_output_path)
-
-## Export to HDF5
-h5_path = loader.get_path('out/regeneration/summaries/bayarea.h5')
-parcels = db_to_df('select * from parcel').set_index('parcel_id')
-jobs = db_to_df('select * from jobs').set_index('job_id')
-hh = db_to_df('select * from households').set_index('household_id')
-
-store = pd.HDFStore(h5_path)
-store['parcels'] = parcels
-store['buildings'] = buildings
-store['households'] = hh
-store['jobs'] = jobs

@@ -102,4 +102,4 @@ check_run('summaries.py')
 check_run('export_to_h5.py')
 
 # # Output buildings, parcels, and zoning tables to UrbanCanvas db.
-check_run('export_to_uc.py')
+# check_run('export_to_uc.py')

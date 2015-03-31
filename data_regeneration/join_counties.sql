@@ -113,6 +113,9 @@ SELECT UpdateGeometrySRID('parcels','geom',
 -- Add primary key column.
 ALTER TABLE parcels ADD COLUMN gid serial PRIMARY KEY;
 
+-- Add imputation_flag column.
+ALTER TABLE parcels ADD COLUMN imputation_flag text default '_';
+
 -- Add parcels table constraints.
 ALTER TABLE parcels ALTER COLUMN county_id SET DATA TYPE char(3);
 ALTER TABLE parcels ALTER COLUMN county_id SET NOT NULL;
@@ -124,10 +127,6 @@ ALTER TABLE parcels ADD CONSTRAINT parcels_apn_unique
 -- Create spatial index.
 CREATE INDEX parcels_geom_gist ON parcels
   USING gist (geom);
-
--- Add county land use code mapping unique constraint.
-ALTER TABLE staging.lucodes ADD CONSTRAINT lucodes_unique
-  UNIQUE (county_id, land_use_type_id);
 
 -- Map county land use codes to regional codes.
 ALTER TABLE parcels ADD COLUMN development_type_id varchar(3);
