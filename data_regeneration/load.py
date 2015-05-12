@@ -10,11 +10,14 @@ logger.setLevel(logging.INFO)
 
 
 shapefiles = {
-    #'staging.controls_blocks':
-    #'hh/control_sm/block10_gba.shp',
+    'staging.controls_blocks':
+    'census/block_geom/bayarea_blocks.shp',
 
-    #'staging.controls_blockgroups':
-    #'hh/control_sm/blockgroup10_gba.shp',
+    # 'staging.controls_blocks':
+    # 'hh/control_sm/block10_gba.shp',
+
+    # 'staging.controls_blockgroups':
+    # 'hh/control_sm/blockgroup10_gba.shp',
 
     #'staging.nat_farms':
     #'nat/farm/williamson_act.shp',

@@ -26,7 +26,7 @@ def check_run(filename):
 print("PREPROCESSING: Loading shapefiles by county.")
 
 # Load shapefile data inputs, fix invalid geometries, and reproject.
-check_run('load.py')
+# check_run('load.py')
 
 
 print("PROCESSING: Loading parcel attributes by county.")
@@ -90,16 +90,22 @@ print("PROCESSING: Attaching zoning_id's to parcels.")
 check_run('attach_zoning_id.py')
 
 
+print("PROCESSING: Creating residential units table.")
+
+# One record per residential unit, with tenure assigned
+check_run('create_residential_units_table.py')
+
+
 print("SUMMARIZING: Generating data summaries.")
 
 # Output summary CSV files by county and TAZ.
 check_run('summaries.py')
 
 
-# print("SUMMARIZING: Exporting to HDF5 and UrbanCanvas db.")
+print("SUMMARIZING: Exporting to HDF5 and UrbanCanvas db.")
 
 # Output core tables to HDF5 for UrbanSim.
 check_run('export_to_h5.py')
 
-# # Output buildings, parcels, and zoning tables to UrbanCanvas db.
-# check_run('export_to_uc.py')
+# # # Output buildings, parcels, and zoning tables to UrbanCanvas db.
+# # check_run('export_to_uc.py')

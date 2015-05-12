@@ -10,7 +10,7 @@ def db_to_df(query):
     return sql.read_frame(query, conn)
 
 ## Export to HDF5-  get path to output file
-h5_path = loader.get_path('out/regeneration/summaries/bayarea_v2.h5')  ## Path to the output file
+h5_path = loader.get_path('out/regeneration/summaries/bayarea_v3.h5')  ## Path to the output file
 
 #Buildings
 buildings = db_to_df('select * from building').set_index('building_id')
@@ -29,6 +29,11 @@ buildings.building_type_id[buildings.development_type_id == 15] = 9
 buildings.building_type_id[buildings.development_type_id == 13] = 8
 buildings.building_type_id[buildings.development_type_id == 17] = 6
 buildings.building_type_id[buildings.development_type_id == 24] = 16
+
+#Residential units
+residential_units = db_to_df('select * from residential_units').set_index('residential_unit_id')
+if 'id' in buildings.columns:
+    del buildings['id']
 
 #Parcels
 parcels = db_to_df('select * from parcel').set_index('parcel_id')
@@ -65,6 +70,7 @@ store = pd.HDFStore(h5_path)
 store['parcels'] = parcels
 store['zoning_for_parcels'] = zoning_for_parcels
 store['buildings'] = buildings
+store['residential_units'] = residential_units
 store['households'] = hh
 store['jobs'] = jobs
 store['zones'] = zones

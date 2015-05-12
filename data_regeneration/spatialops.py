@@ -10,6 +10,9 @@ t = loader.tables
 ###Tagging parcels with taz id based on point in poly
 tag(t.public.parcels, 'taz', t.staging.taz, 'taz_key')
 
+###Tagging parcels with long-form census 2010 block geoid based on point in poly
+tag(t.public.parcels, 'block_id', t.staging.controls_blocks, 'blockid10')
+
 
 ###Deal with special cases where parcels do not fall within TAZ boundaries
 def db_to_df(query):
